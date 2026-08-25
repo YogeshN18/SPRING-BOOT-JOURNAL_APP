@@ -1,0 +1,400 @@
+Spring Boot Revision Notes (Enhanced)
+Based on topics covered in your project and playlist
+
+====================================================================
+1) What is REST API
+====================================================================
+REST API (Representational State Transfer API) is a style to build web services over HTTP.
+It allows different applications to communicate using standard HTTP methods.
+
+Core principles:
+- Resource-based URLs (nouns, not verbs)
+  - Good: /api/journals
+  - Avoid: /api/getJournals
+- Stateless communication
+  - Every request should contain all required information.
+- Standard HTTP methods
+  - GET: fetch data
+  - POST: create data
+  - PUT: full update
+  - PATCH: partial update
+  - DELETE: remove data
+- Proper status codes
+  - 200 OK, 201 Created, 204 No Content, 400 Bad Request,
+    401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error
+
+Interview line:
+"REST helps us design scalable APIs with clear resource URLs, HTTP methods, and status codes."
+
+
+====================================================================
+2) Work with MongoDB using mongosh
+====================================================================
+Important shell commands:
+- show dbs
+- use journaldb
+- show collections
+- db.journalEntry.find()
+- db.journalEntry.find().pretty()
+- db.journalEntry.insertOne({ title: "A", content: "B" })
+- db.journalEntry.updateOne({ _id: ObjectId("...") }, { $set: { title: "Updated" } })
+- db.journalEntry.deleteOne({ _id: ObjectId("...") })
+
+Your warning:
+"Access control is not enabled"
+Meaning:
+- MongoDB authentication is disabled.
+- Fine for local practice.
+- Not safe for production.
+
+Spring Data MongoDB mapping:
+- @Document(collection = "journalEntry")
+- @Id for document id
+- MongoRepository for CRUD operations
+
+Interview line:
+"For local development we can use open MongoDB, but production must enable auth and role-based access."
+
+
+====================================================================
+3) ResponseEntity
+====================================================================
+ResponseEntity is a Spring class that represents complete HTTP response:
+- Status code
+- Headers
+- Body
+
+Why use it:
+- Full control over API response behavior.
+- Better REST semantics.
+
+Common examples:
+- ResponseEntity.ok(data)
+- ResponseEntity.status(HttpStatus.CREATED).body(savedObject)
+- ResponseEntity.notFound().build()
+
+Interview line:
+"I use ResponseEntity when I need explicit control over status code and response body for each scenario."
+
+
+====================================================================
+4) Lombok
+====================================================================
+Lombok reduces boilerplate code in Java classes.
+
+Useful annotations:
+- @Getter, @Setter
+- @NoArgsConstructor, @AllArgsConstructor
+- @Data (getter + setter + toString + equals + hashCode)
+- @Builder
+
+Benefits:
+- Cleaner code
+- Faster development
+- Better readability
+
+Caution:
+- Do not expose sensitive fields (like password) in toString.
+
+Interview line:
+"Lombok improves productivity, but we must use it carefully around sensitive fields and entity equality."
+
+
+====================================================================
+5) Spring Security
+====================================================================
+Spring Security handles:
+- Authentication (Who are you?)
+- Authorization (What can you access?)
+
+Common components:
+- SecurityFilterChain
+- UserDetailsService (custom user loading)
+- PasswordEncoder (BCryptPasswordEncoder)
+
+Typical endpoint rules:
+- Public endpoints: /public/**, /health
+- Authenticated endpoints: /journal/**
+- Role-based endpoints: /admin/**
+
+Best practice:
+- Always store hashed passwords (BCrypt), never plain text.
+
+Interview line:
+"Authentication verifies user identity, authorization checks access permissions; Spring Security manages both."
+
+
+====================================================================
+6) How Spring reads application.properties
+====================================================================
+Spring Boot automatically loads configuration from:
+- application.properties (default)
+- profile-specific files (application-dev.properties, application-prod.properties)
+
+Ways to access config values:
+- @Value("${key}")
+- @ConfigurationProperties for grouped configuration
+
+Order concept (high-level):
+- Command-line and environment settings can override file values.
+
+Security note:
+- Never store secrets in git-tracked properties files.
+
+Interview line:
+"I keep non-sensitive config in properties and inject values using @Value or @ConfigurationProperties."
+
+
+====================================================================
+7) JUnit (Testing)
+====================================================================
+Correct annotations:
+- @SpringBootTest
+- @Test
+- @Mock
+- @InjectMocks
+- @ParameterizedTest
+- @CsvSource
+- @Disabled
+
+Test types:
+- Unit tests: test business logic with mocked dependencies
+- Integration tests: test Spring context + repository/controller behavior
+
+What to cover:
+- Happy path
+- Validation failures
+- Exception/edge cases
+
+Interview line:
+"I combine unit tests for logic and integration tests for end-to-end Spring behavior."
+
+
+====================================================================
+8) Spring Boot Profiles
+====================================================================
+Profiles help keep separate configurations per environment.
+
+Example files:
+- application-dev.properties
+- application-prod.properties
+
+How to activate:
+- spring.profiles.active=dev
+or via environment variable:
+- SPRING_PROFILES_ACTIVE=prod
+
+Use cases:
+- Different DB URLs
+- Different logging levels
+- Feature flags per environment
+
+Interview line:
+"Profiles allow safe environment-specific configs without changing code."
+
+
+====================================================================
+9) Logging in Spring Boot
+====================================================================
+Default logging framework in Spring Boot: Logback
+
+Log levels:
+- TRACE
+- DEBUG
+- INFO
+- WARN
+- ERROR
+
+Guidelines:
+- INFO for business events
+- DEBUG for developer diagnostics
+- ERROR with exception stack traces
+- Never log sensitive data (passwords/tokens)
+
+Interview line:
+"Good logging improves debugging and production monitoring without exposing sensitive information."
+
+
+====================================================================
+10) SonarLint and SonarCloud
+====================================================================
+SonarLint:
+- IDE plugin for real-time code smell/bug detection while coding.
+
+SonarCloud:
+- Cloud quality platform for CI pipelines.
+- Tracks bugs, vulnerabilities, code smells, coverage.
+
+Benefits:
+- Better code quality
+- Early issue detection
+- Standardized code health in team projects
+
+Interview line:
+"I use SonarLint locally and SonarCloud in CI to catch quality/security issues early."
+
+
+====================================================================
+11) External API Consumption (RestTemplate / WebClient)
+====================================================================
+RestTemplate:
+- Synchronous, blocking client.
+- Easy for simple use cases.
+
+WebClient:
+- Non-blocking, reactive, modern option.
+- Better for high-concurrency applications.
+
+Best practices:
+- Add timeouts
+- Handle non-2xx errors explicitly
+- Add retry only where safe
+- Log request failures clearly
+
+Interview line:
+"For new projects I prefer WebClient, while RestTemplate is still seen in legacy codebases."
+
+
+====================================================================
+12) @Value Annotation
+====================================================================
+@Value injects values from:
+- properties files
+- environment variables
+- system properties
+
+Example:
+@Value("${app.title}")
+private String appTitle;
+
+Important:
+- Use environment variables for secrets.
+- Keep credentials outside source control.
+
+Interview line:
+"@Value is good for individual properties; for grouped settings I use @ConfigurationProperties."
+
+
+====================================================================
+13) Criteria API
+====================================================================
+Criteria API is mostly used with Spring Data JPA/Hibernate for dynamic, type-safe SQL queries.
+
+When useful:
+- Dynamic filtering
+- Optional search parameters
+- Complex query construction
+
+MongoDB note:
+- In Mongo-based projects, similar dynamic filtering is usually done via MongoTemplate/Criteria.
+
+Interview line:
+"Criteria API is ideal for dynamic JPA queries; Mongo has its own criteria/query builder approach."
+
+
+====================================================================
+14) Java Email API (JavaMail)
+====================================================================
+JavaMail is used to send/receive emails using protocols like SMTP, POP3, IMAP.
+In Spring Boot, we commonly use JavaMailSender for sending emails.
+
+Common use cases:
+- Welcome email
+- Password reset
+- Alert/notification email
+
+Good practices:
+- Keep SMTP credentials in environment variables
+- Handle email failures and log properly
+
+Interview line:
+"I integrate JavaMail through Spring Boot starter and externalize SMTP credentials for security."
+
+
+====================================================================
+15) Cron Expression / Scheduling in Spring Boot
+====================================================================
+Scheduling allows running tasks automatically at fixed times.
+
+Setup:
+- @EnableScheduling in config/main class
+- @Scheduled on methods
+
+Examples:
+- @Scheduled(fixedRate = 60000) -> every 60 seconds
+- @Scheduled(cron = "0 0 9 * * *") -> every day at 9 AM
+
+Use cases:
+- Daily reports
+- Cleanup jobs
+- Reminder notifications
+
+Interview line:
+"I use @Scheduled for periodic background jobs and cron expressions for precise time-based execution."
+
+
+====================================================================
+16) JWT
+====================================================================
+JWT (JSON Web Token) is used for stateless authentication.
+
+Flow:
+1. User logs in with credentials
+2. Server validates and issues token
+3. Client sends token in Authorization header (Bearer token)
+4. Server validates token for each request
+
+Token parts:
+- Header
+- Payload
+- Signature
+
+Benefits:
+- Stateless
+- Scales well in distributed systems
+
+Caution:
+- Use expiry time
+- Sign with secure key
+- Do not store sensitive data in payload
+
+Interview line:
+"JWT removes server session dependency by carrying authenticated user context in a signed token."
+
+
+====================================================================
+17) OAuth2
+====================================================================
+OAuth2 is an authorization framework for delegated access.
+
+Simple meaning:
+- User allows one app to access data/resources from another app without sharing password.
+
+Common example:
+- Login with Google/GitHub
+
+Key idea:
+- OAuth2 = authorization framework
+- JWT = token format (often used with OAuth2, but not mandatory)
+
+Interview line:
+"OAuth2 is for delegated authorization, while JWT is typically the token used to carry claims."
+
+
+====================================================================
+Quick 1-Page Revision
+====================================================================
+- REST: resource-based APIs + HTTP methods + status codes
+- MongoDB: CRUD via mongosh + Spring Data MongoRepository
+- ResponseEntity: full HTTP response control
+- Lombok: reduce boilerplate
+- Security: authn + authz + BCrypt
+- Config: properties + profiles + @Value
+- Testing: JUnit + Mockito + integration tests
+- Logging: Logback + proper levels
+- External API: RestTemplate/WebClient
+- Scheduling: @Scheduled + cron
+- Email: JavaMailSender
+- Auth tokens: JWT and OAuth2 concepts
+
+End of enhanced notes.
